@@ -19,6 +19,26 @@ protected:
 
     bool loadStepsFromFile();
 
+    void onScreenChange(Player p, int room) override {
+        actualResults.addScreenChange(getGameCycle(), p, room);
+    }
+
+    void onLifeLost(Player p) override {
+        actualResults.addLifeLost(getGameCycle(), p);
+    }
+
+    void onRiddle(Player p, bool correct) override {
+        actualResults.addRiddle(getGameCycle(), p, correct);
+    }
+
+    void onGameEnd() override {
+        Player* players=getPlayersArr();
+        actualResults.addGameEnd(getGameCycle(),players[0].getScore(), players[1].getScore());
+    }
+
+    int getDelay() const override { return silentMode ? 0 : 10; }
+
+
 public:
     FileGame(bool silent = false);
     ~FileGame();
