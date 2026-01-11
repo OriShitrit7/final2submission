@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include <iostream>
+#include "Point.h"
 using namespace std;
 
 #ifndef _WIN32
@@ -10,6 +11,8 @@ using namespace std;
 
 static struct termios oldSettings;
 #endif
+
+void Utils::gotoxy(const Point pos) {return gotoxy(pos.getX(), pos.getY());}
 
 void Utils::gotoxy(int x, int y) {
 #ifdef _WIN32
@@ -55,11 +58,6 @@ std::string Utils::toUpperCase(std::string str) {
 	return str;
 }
 
-void Utils::delay(int ms)
-{
-	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-};
-
 void Utils::hideCursor() {
 #ifdef _WIN32
 	HANDLE myconsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -101,7 +99,7 @@ void Utils::initConsole() {
 #ifndef _WIN32
 	tcgetattr(STDIN_FILENO, &oldSettings);
 	struct termios newSettings = oldSettings;
-	newSettings.c_lflag &= ~(ICANON | ECHO); // ëéáåé Enter åëéáåé äãôñä
+	newSettings.c_lflag &= ~(ICANON | ECHO); // ï¿½ï¿½ï¿½ï¿½ï¿½ Enter ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
 	tcsetattr(STDIN_FILENO, TCSANOW, &newSettings);
 #endif
 	hideCursor();

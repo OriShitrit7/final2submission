@@ -9,8 +9,8 @@ add_executable(final2
         Bomb.cpp
         Bomb.h
         Door.h
-        Game.cpp
-        Game.h
+        GameBase.cpp
+        GameBase.h
         GameDefs.h
         Key.h
         Main.cpp
@@ -32,4 +32,10 @@ add_executable(final2
         Torch.cpp
         Torch.h
         Utils.cpp
-        Utils.h)
+        Utils.h
+        FileGame.h
+        Results.h
+        KeyBoardGame.h
+        KeyBoardGame.cpp
+        FileGame.cpp
+)

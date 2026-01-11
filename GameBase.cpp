@@ -1,22 +1,12 @@
-#include "Game.h"
+#include "GameBase.h"
 #include <iostream>
 #include <fstream>
 #include <cstdio>
 
 // Game Functions
 
-Game::Game()
-{
-    Utils::initConsole();
 
-    gameOver = false;           
-    isRunning = false;
-
-    setGame();
-    showMenu();      // going into the main menu
-}
-
-void Game::setGame()
+void GameBase::setGame()
 {
     gameOver = false;
     isRunning = false;
@@ -25,108 +15,49 @@ void Game::setGame()
     {
         playerFinished[i] = false;
         roomsDone[i] = 0;
-        playerRoom[i] = -1;  
+        playerRoom[i] = -1;
     }
 
     fixedScreens[MENU_SCREEN].setMap(MENU_MAP);
     fixedScreens[INSTRUCTIONS_SCREEN].setMap(INSTRUCTIONS_MAP);
 }
 
-Game::~Game()
-{
-    Utils::restoreConsole();
-}
 
-// Main game loop – manages input, updates game logic, and renders frames.
-void Game::run() {
-    isRunning = true;      // setting flags 
+// Main game loop ï¿½ manages input, updates game logic, and renders frames.
+void GameBase::run() {
+    isRunning = true;      // setting flags
     gameOver = false;
 
     render();              // draw the initial room before any movement
-  
-    while (isRunning)         
+
+    while (isRunning)
     {
+        gameCycles++;
+
         handleInput();  // handle user's input
 
-        if (!isRunning)    // input may request to leave run()    
+        if (!isRunning)    // input may request to leave run()
             break;
 
-        if (!gameOver)    
+        if (!gameOver)
         {
-            update();    // update world state only in active gameplay     
+            update();    // update world state only in active gameplay
         }
 
         if (!isRunning)
             break;
 
         render();       // redraw everything after update
-        Utils::delay(150);
-    }
-}
+        Utils::delay(getDelay());
 
-void Game::handleInput()
-{
-    if (!Utils::hasInput())   // no key pressed this frame
-        return;
-
-    char ch = Utils::getChar();
-    char c = std::toupper(ch);
-
-    // If the game is already over (final room):
-    // only 'H' should work and return to the main menu
-    if (gameOver)
-    {
-        if (c == HOME)
-        {
-            isRunning = false;      // leave run() and go back to menu
-        }
-        return;                     // ignore all other keys in final room
-    }
-    // Pause the game
-    if (c == ESC)
-    {
-        pauseGame();
-        return;
-    }
-
-    // Player wants to restart room
-    if (c == RESTART)
-    {
-        if (!restartCurrentRoom()){
-
-            isRunning = false;
-            return;
-        }
-        return;
-    }
-    // Dispose keys (bomb/key usage)
-    if (players[PLAYER_1].isDisposeKey(c)) {
-        
-        handleDispose(players[PLAYER_1]);
-        return;
-    }
-
-    if (players[PLAYER_2].isDisposeKey(c)) {
-      
-        handleDispose(players[PLAYER_2]);
-        return;
-    }
-    // Movement keys
-    if (players[PLAYER_1].isMoveKey(c)){
-       
-        players[PLAYER_1].setDir(c);
-    }
-    if (players[PLAYER_2].isMoveKey(c)){
-        
-        players[PLAYER_2].setDir(c);
     }
 }
 
 // Updates game state for all players
-void Game::update()
+void GameBase::update()
 {
     Screen& room = screens[currRoomID];
-    room.clearIllumination();           // òáø ìëàï ëãé ùìà éúáöò ôòîééí òáåø ëì ùç÷ï
+    room.clearIllumination();           // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     for (int i = 0; i < NUM_PLAYERS; i++)
         prevPos[i] = players[i].getPos();
@@ -134,14 +65,14 @@ void Game::update()
     for (int i = 0; i < NUM_PLAYERS; i++)
     {
         Player& player = players[i];
-         
+
         if (playerFinished[i] || playerRoom[i] != currRoomID)   // Player not in this room or already finished
             continue;
 
         // Respawn logic
-        if (player.getDead()) 
+        if (player.getDead())
         {
-            player.respawn();     
+            player.respawn();
             continue;
         }
 
@@ -153,7 +84,7 @@ void Game::update()
         if (player.isAccelerating())
             player.tickAcceleration();
 
-        // Inner loop – handles cell-by-cell movement if speed > 1.
+        // Inner loop ï¿½ handles cell-by-cell movement if speed > 1.
         for (int s = 0; s < steps; s++)
         {
             Point stepStartPos = player.getPos();
@@ -213,7 +144,7 @@ void Game::update()
             if (playerRoom[i] != currRoomID || player.getDead())
                 break;
         }
-    }       
+    }
 
     handleBombs();        // ticking bombs only once per frame
 
@@ -224,7 +155,7 @@ void Game::update()
 }
 
 // Draws current room and both players.
-void Game::render()
+void GameBase::render()
 {
     Screen& room = screens[currRoomID];
 
@@ -239,8 +170,8 @@ void Game::render()
     std::cout << std::flush;
 }
 
-void Game::pauseGame()
-{   
+/*void Game::pauseGame()
+{
     Utils::clearScreen();
     Utils::gotoxy(5, 10);
     std::cout << "Game paused, press ESC again to continue or H to go back to the main menu";
@@ -267,103 +198,15 @@ void Game::pauseGame()
             return;
         }
     }
-}
-    
-void Game::showMenu()
+}*/
+
+void GameBase::delay(int ms)
 {
-    char choice = '\0'; 
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+};
 
-    while (true)
-    {
-        fixedScreens[MENU_SCREEN].drawBase();
-        std::cout << std::flush;
 
-        char ch = Utils::getChar();
-        choice = std::toupper(ch);
-
-        switch (choice)
-        {
-        case START: // Start new game
-            initGame();          // prepares the game - map, objects, players        
-
-            if (!loadGameFiles())  // file-related error: return to main menu
-                break;  
-
-            run();    // start game
-            break;
-
-        case INSTRUCTIONS:    // Show instructions
-            showInstructions();
-            break;
-
-        case EXIT:    // Exit game
-            isRunning = false;
-            return;
-
-        default:       
-            Utils::gotoxy(33, 14);
-            std::cout << "Invalid choice.";
-            Utils::delay(800);
-            break;
-        }
-    }
-}
-
-void Game::showInstructions()
-{
-    Utils::clearScreen();
-    fixedScreens[INSTRUCTIONS_SCREEN].drawBase();   // Shows the instructions screen
-
-    // Title
-    Utils::gotoxy(30, 2);
-    std::cout << "=== INSTRUCTIONS ===";
-
-    // Goal & Basics
-    Utils::gotoxy(2, 3);
-    std::cout << "GOAL: Reach Final Room together! Move through rooms and earn points.";
-    Utils::gotoxy(2, 4);
-    std::cout << "RESTART ROOM: 'R' || GAME OVER: If any player has 0 Lives.";
-    Utils::gotoxy(2, 5);
-    std::cout << "POINTS: Key(10) Door(20) Riddle(10) Win(1st:100/2nd:50).";
-
-    // Controls
-    Utils::gotoxy(4, 7);
-    std::cout << "CONTROLS:         PLAYER 1      PLAYER 2";
-    Utils::gotoxy(4, 8);
-    std::cout << "Move (U/L/D/R):   W/A/X/D       I/J/M/L";
-    Utils::gotoxy(4, 9);
-    std::cout << "Stay / Dispose:   S  /  E       K  /  O";
-
-    Utils::gotoxy(4, 11);
-    std::cout << "ITEMS (Walk over an item to pick it up, max 1 item per player):";
-    Utils::gotoxy(6, 12);
-    std::cout << "+ Key (" << BOARD_KEY << "): Collect to open matching doors.";
-    Utils::gotoxy(6, 13);
-    std::cout << "+ Bomb (" << BOARD_BOMB << "): Explodes in 5 turns. Destroys players & walls (" << WALL_VERT << ' ' << WALL_HORIZ << ").";
-    Utils::gotoxy(6, 14);
-    std::cout << "+ Torch (" << BOARD_TORCH << "): Reveals invisible DARK AREAS (" << DARK_CHAR << ").";
-    Utils::gotoxy(6, 15);
-    std::cout << "Doors: Open only when the required keys and switches are set,";
-    Utils::gotoxy(6, 16);
-    std::cout << "Riddle (" << BOARD_RIDDLE << "): Blocks path! Answer correctly to remove.";
-    Utils::gotoxy(6, 17);
-    std::cout << "Switch (" << BOARD_SWITCH_ON << ' ' << BOARD_SWITCH_OFF << "): Stepping on it toggles Doors.";
-    Utils::gotoxy(6, 18);
-    std::cout << "Spring (" << BOARD_SPRING << "): Launches player (High Speed!).";  
-    Utils::gotoxy(6, 19);
-    std::cout << "Obstacle (" << BOARD_OBSTACLE << "): Heavy! Move by High Speed or Teamwork.";
-    Utils::gotoxy(6, 20);
-    std::cout << "Teleport (" << BOARD_TELEPORT << "): Move through portals in the room.";
-
-    // Return
-    Utils::gotoxy(2, 23);
-    std::cout << "Press any key to return.";
-
-    std::cout << std::flush;
-    char c = Utils::getChar();   // Wait for user input
-}
-
-void Game::showError(const std::string& msg)
+void GameBase::showError(const std::string& msg)
 {
     Utils::clearScreen();
 
@@ -409,7 +252,7 @@ void Game::showError(const std::string& msg)
     Utils::getChar();
 }
 
-void Game::showMessage(const std::string& msg)
+void GameBase::showMessage(const std::string& msg)
 {
     Utils::clearScreen();
     std::string line1, line2;
@@ -447,7 +290,7 @@ void Game::showMessage(const std::string& msg)
 }
 
 // Init Functions
-void Game::initGame()
+void GameBase::initGame()
 {
     screens.clear();
     // --- Set global game state ---
@@ -471,8 +314,8 @@ void Game::initGame()
     players[PLAYER_2].setPlayer(Point(3, 11), '&', keys2);
 }
 
-bool Game::loadGameFiles() {  // *Developed with AI assistance*
-   
+bool GameBase::loadGameFiles() {  // *Developed with AI assistance*
+
     std::vector<std::string> foundFiles;
     char filenameBuffer[50];
 
@@ -483,7 +326,7 @@ bool Game::loadGameFiles() {  // *Developed with AI assistance*
         std::ifstream fileCheck(filenameBuffer);
         if (fileCheck.good())
         {
-            foundFiles.push_back(filenameBuffer); 
+            foundFiles.push_back(filenameBuffer);
         }
     }
     // No screen files found
@@ -513,7 +356,7 @@ bool Game::loadGameFiles() {  // *Developed with AI assistance*
     return true;
 }
 
-bool Game::initGameFiles(std::vector<std::string>& foundFiles)
+bool GameBase::initGameFiles(std::vector<std::string>& foundFiles)
 {
     screens.clear();
     screens.resize(foundFiles.size() + 2);      // +2: index 0 unused, last index reserved for final room
@@ -572,7 +415,7 @@ bool Game::initGameFiles(std::vector<std::string>& foundFiles)
     return true;
 }
 
-bool Game::loadRiddles() {
+bool GameBase::loadRiddles() {
     std::ifstream file("riddles.txt");
     if (!file.is_open())
     {
@@ -591,7 +434,7 @@ bool Game::loadRiddles() {
         Riddle* r = screens[roomID].getRiddleAt(Point(x, y));
 
         if (!r) {
-            showError("Rule refers to non-existing riddle in room " + std::to_string(roomID) + 
+            showError("Rule refers to non-existing riddle in room " + std::to_string(roomID) +
                 " at (" + std::to_string(x) + "," + std::to_string(y) + ")");
             return false;
         }
@@ -604,7 +447,7 @@ bool Game::loadRiddles() {
     return true;
 }
 
-bool Game::loadRiddles(int loadRoomID) {
+bool GameBase::loadRiddles(int loadRoomID) {
     std::ifstream file("riddles.txt");
     if (!file.is_open())
     {
@@ -634,7 +477,7 @@ bool Game::loadRiddles(int loadRoomID) {
 }
 
 // UI Display Functions
-void Game::displayLegend(const Screen& room)
+void GameBase::displayLegend(const Screen& room)
 {
     const LegendArea& legend = room.getLegend();
     if (!legend.exists)
@@ -710,7 +553,7 @@ void Game::displayLegend(const Screen& room)
     std::cout << players[PLAYER_2].getInventoryChar();
 }
 
-void Game::displayFinalScoreboard() const
+void GameBase::displayFinalScoreboard() const
 {
     int score1 = players[PLAYER_1].getScore();
     int score2 = players[PLAYER_2].getScore();
@@ -746,12 +589,12 @@ void Game::displayFinalScoreboard() const
     std::cout << "====================";
 }
 
-void Game::drawPlayers()
+void GameBase::drawPlayers()
 {
     for (int i = 0; i < NUM_PLAYERS; ++i)
     {
         // if player isn't in current room (moved on to the next one) - no need to draw them
-        if (playerRoom[i] != currRoomID || players[i].getDead())  
+        if (playerRoom[i] != currRoomID || players[i].getDead())
             continue;
 
         // draw players present in the current room
@@ -762,10 +605,10 @@ void Game::drawPlayers()
 
 // Restart Functions
 
-bool Game::restartCurrentRoom()
+bool GameBase::restartCurrentRoom()
 {
     // Final room does not support restart
-    if (isFinalRoom(currRoomID))
+    if (isFinalRoom(currRoomID)) // ×¦×¨×™×š ×œ×˜×¤×œ ×‘×ž×§×¨×” ×©×× ×—× ×• ×‘fileGame
     {
         return true;
     }
@@ -785,7 +628,7 @@ bool Game::restartCurrentRoom()
     return true;
 }
 
-bool Game::reloadRoom(int roomID)
+bool GameBase::reloadRoom(int roomID) //
 {
     // Reloads a specific room from its original source file.
 
@@ -799,7 +642,7 @@ bool Game::reloadRoom(int roomID)
     {
         showError("Restarting room failed");
         return false;
-    }   
+    }
     // Reload screen from file
     if (!screens[roomID].loadScreenFromFile(filename, error, warning)) {
         showError(error);
@@ -821,7 +664,7 @@ bool Game::reloadRoom(int roomID)
 
 // Helper Functions
 
-void Game::moveRoom(Player& player, int dest)
+void GameBase::moveRoom(Player& player, int dest)
 {
     int idx = (&player == &players[PLAYER_1]) ? PLAYER_1 : PLAYER_2;      // determine which player is moving
     int other = 1 - idx;                             // index of the other player
@@ -840,7 +683,7 @@ void Game::moveRoom(Player& player, int dest)
         // we return to the second player
         if (!playerFinished[other])
         {
-            currRoomID = playerRoom[other];   
+            currRoomID = playerRoom[other];
             player.addScore(scoreValue(ScoreEvent::FinishGameFirst));
         }
         else
@@ -863,7 +706,7 @@ void Game::moveRoom(Player& player, int dest)
 
     player.setStartPos(startP);
 
-    player.addScore(scoreValue(ScoreEvent::OpenDoor));  
+    player.addScore(scoreValue(ScoreEvent::OpenDoor));
 
     // decide which room should currently be displayed:
     if (roomsDone[PLAYER_1] < roomsDone[PLAYER_2])
@@ -874,8 +717,8 @@ void Game::moveRoom(Player& player, int dest)
         currRoomID = playerRoom[idx];     // same progress - follow the moving player
 }
 
-// Calculates the player's starting position in the next room based on the door's position 
-Point Game::getStartPoint(Player& player, int idx) const {
+// Calculates the player's starting position in the next room based on the door's position
+Point GameBase::getStartPoint(Player& player, int idx) const {
    auto& room = screens[currRoomID];
 
    Point posOnDoor = player.getPos();      // player is standing on the door
@@ -885,7 +728,7 @@ Point Game::getStartPoint(Player& player, int idx) const {
 
    Point startPos(startX, startY);
 
-   if (!room.isLegendCell(startPos) && room.charAt(startPos) == ' ') {   // if cell is clear  
+   if (!room.isLegendCell(startPos) && room.charAt(startPos) == ' ') {   // if cell is clear
        return startPos;
    }
 
@@ -901,11 +744,11 @@ Point Game::getStartPoint(Player& player, int idx) const {
 }
 
 // Checks if the current player and the other player are about to step into the same cell
-bool Game::playersCollide(int idx, const Point& nextPos)
+bool GameBase::playersCollide(int idx, const Point& nextPos)
 {
     int other = 1 - idx;
 
-    // Only relevant if both players are in the same room 
+    // Only relevant if both players are in the same room
     if (playerRoom[other] != playerRoom[idx])
         return false;
 
@@ -920,7 +763,7 @@ bool Game::playersCollide(int idx, const Point& nextPos)
 
     Direction myDir = players[idx].getDir();
     Direction otherDir = players[other].getDir();
-    bool otherBlocked = (otherNext != otherPos);    // true if other is blocked by an object 
+    bool otherBlocked = (otherNext != otherPos);    // true if other is blocked by an object
 
     // Case 1: other player in stay mode = collision
     if (otherDir == STAY)
@@ -929,7 +772,7 @@ bool Game::playersCollide(int idx, const Point& nextPos)
 
         return true;
     }
-    
+
     // Case 2: head-on collision (opposite directions)
     if (Point::areOpposite(myDir, otherDir))
     {
@@ -957,14 +800,14 @@ bool Game::playersCollide(int idx, const Point& nextPos)
         else
         {
             players[idx].bumpedInto(players[other]);
-            return true;    // collision 
+            return true;    // collision
         }
     }
     // Otherwise: same direction (chasing) = no collision
     return false;
 }
 
-void Game::applyLifeLoss(Player& player)
+void GameBase::applyLifeLoss(Player& player)
 {
     // Decrease player's life and check if still alive
     bool stillAlive = player.lowerLife();
@@ -974,13 +817,13 @@ void Game::applyLifeLoss(Player& player)
     {
         showMessage("Player is dead. Better luck next time... -.-");
         gameOver = true;
-        isRunning = false;   
+        isRunning = false;
     }
 }
 
 // Handle Functions
 
-void Game::handleDoor(Player& player)
+void GameBase::handleDoor(Player& player)
 {
     Screen& room = screens[currRoomID];
     Point p = player.getPos();
@@ -990,10 +833,10 @@ void Game::handleDoor(Player& player)
         return;
     }
 
-    Door* d = room.getDoorAt(p);        // get door object  
+    Door* d = room.getDoorAt(p);        // get door object
     int dest = d->getDestination();
 
-    if (d->checkIsOpen())            // if door is already open move room immidiately   
+    if (d->checkIsOpen())            // if door is already open move room immidiately
     {
         moveRoom(player, dest);
 
@@ -1010,7 +853,7 @@ void Game::handleDoor(Player& player)
 
                 if (d->getNeededKeys() == 0)   // check if more keys are needed
                 {
-                    d->updateKeyOK();         // change key flag  
+                    d->updateKeyOK();         // change key flag
                 }
             }
         }
@@ -1023,9 +866,9 @@ void Game::handleDoor(Player& player)
     }
 }
 
-void Game::handleSwitch(Player& player)
+void GameBase::handleSwitch(Player& player)
 {
-    Screen& room = screens[currRoomID];  
+    Screen& room = screens[currRoomID];
     Point p = player.getPos();
 
     if (!room.isSwitch(p))   // no switch at this cell
@@ -1049,10 +892,10 @@ void Game::handleSwitch(Player& player)
 
 }
 
-bool Game::handleSprings(Player& player)
+bool GameBase::handleSprings(Player& player)
 {                                          // *Logic reviewed with ChatGPT assistance*
     Screen& room = screens[currRoomID];
-    Point next = player.getPos().next(player.getDir());  
+    Point next = player.getPos().next(player.getDir());
 
     // Check spring on target cell
     Spring* sp = room.getSpringAt(next);
@@ -1071,7 +914,7 @@ bool Game::handleSprings(Player& player)
 
         if (!adj)
         {
-            // No spring found nearby – fail safely
+            // No spring found nearby ï¿½ fail safely
             player.resetCompression();
             return false;
         }
@@ -1079,35 +922,35 @@ bool Game::handleSprings(Player& player)
         launchPlayer(player, *adj);
         return false;
     }
-    else if (sp)  
+    else if (sp)
     {
         Point tip = sp->getTipPos();
-        if (next != tip)    
+        if (next != tip)
         {
             // Player is colliding into a spring from the side (blocked from moving)
             return true;
         }
 
-        Direction spDir = sp->getDir();    
+        Direction spDir = sp->getDir();
         Direction playerDir = player.getDir();
-        bool compressDir = Point::areOpposite(playerDir, spDir);  
+        bool compressDir = Point::areOpposite(playerDir, spDir);
 
-        if (next == tip && !compressDir)  
+        if (next == tip && !compressDir)
         {
             // Player is colliding into the tip from the side (blocked also)
             return true;
         }
 
-        if (compressDir && next == tip)  
+        if (compressDir && next == tip)
         {
             // Player is moving into the spring
-           
+
             if (player.isAccelerating())
             {
                 // If player is accelerating from another spring (reset accel)
                 player.stopAcceleration();
             }
-            if (compressSpring(player, *sp)) 
+            if (compressSpring(player, *sp))
             {
                 // curr size > 0 still
                 player.move();           // Successfully collapsed a link - move forward
@@ -1121,14 +964,14 @@ bool Game::handleSprings(Player& player)
                 return false;
             }
         }
-       
+
     }
 
     return false; // no special spring handling
 
 }
 
-void Game::handleBombs() {
+void GameBase::handleBombs() {
     //Updates bomb timers in the current room and triggers explosions
     Screen& room = screens[currRoomID];
     std::vector<Bomb>& bombs = room.getBombs();
@@ -1147,7 +990,7 @@ void Game::handleBombs() {
     }
 }
 
-bool Game::handleRiddles(Player& player) {
+bool GameBase::handleRiddles(Player& player) {
     // Handles interaction between a player and a riddle.
 
     Screen& room = screens[currRoomID];
@@ -1172,7 +1015,7 @@ bool Game::handleRiddles(Player& player) {
     return solved;
 }
 
-void Game::handleTorch(Player& player)
+void GameBase::handleTorch(Player& player)
 {
     Screen& room = screens[currRoomID];
 
@@ -1184,14 +1027,14 @@ void Game::handleTorch(Player& player)
     return;
 }
 
-bool Game::handleObstacles(Player& player, const Point& nextPos)
+bool GameBase::handleObstacles(Player& player, const Point& nextPos)
 {
     Screen& room = screens[currRoomID];
     Point p = nextPos;
 
     if (!room.isObstacle(p))   // no obstacle at this cell
     {
-        return false;    // player can continue moving 
+        return false;    // player can continue moving
     }
 
     Obstacle* ob = room.getObstacleAt(p);
@@ -1225,12 +1068,12 @@ bool Game::handleObstacles(Player& player, const Point& nextPos)
     }
 }
 
-void Game::handleCollectibles(Player& player)
+void GameBase::handleCollectibles(Player& player)
 {
-    Screen& room = screens[currRoomID];  
+    Screen& room = screens[currRoomID];
     Point p = player.getPos();
 
-    // Player already holds an item – cannot pick up another
+    // Player already holds an item ï¿½ cannot pick up another
     if (!player.inventoryEmpty())
     {
         return;
@@ -1256,7 +1099,7 @@ void Game::handleCollectibles(Player& player)
     }
 }
 
-bool Game::handleTeleports(Player& player) {
+bool GameBase::handleTeleports(Player& player) {
     Screen& room = screens[currRoomID];
     Point currentPos = player.getPos();
     if (currentPos == player.getTeleportPos()) {
@@ -1275,9 +1118,9 @@ bool Game::handleTeleports(Player& player) {
 }
 
 
-bool Game::handleDispose(Player& player)
-{                                       
-    Screen& room = screens[currRoomID];  
+bool GameBase::handleDispose(Player& player)
+{
+    Screen& room = screens[currRoomID];
 
     if (player.inventoryEmpty())
     {
@@ -1335,7 +1178,7 @@ bool Game::handleDispose(Player& player)
     return true;
 }
 
-bool Game::handleAcceleratedMovement(Player& player, int index)
+bool GameBase::handleAcceleratedMovement(Player& player, int index)
 {
     Screen& room = screens[playerRoom[index]];
 
@@ -1372,7 +1215,7 @@ bool Game::handleAcceleratedMovement(Player& player, int index)
             return true;
 
         if (handleObstacles(player, nextPos)){  // stop movement for this loop
-        
+
             return true;
         }
 
@@ -1387,7 +1230,7 @@ bool Game::handleAcceleratedMovement(Player& player, int index)
             return true;
         }
 
-        // player collision 
+        // player collision
         if (playersCollide(index, nextPos)){
             return true;
         }
@@ -1406,7 +1249,7 @@ bool Game::handleAcceleratedMovement(Player& player, int index)
 
         handleDoor(player);
 
-        // if moved rooms or died — stop movement now
+        // if moved rooms or died ï¿½ stop movement now
         if (playerRoom[index] != currRoomID || player.getDead())
             return true;
     }
@@ -1415,7 +1258,7 @@ bool Game::handleAcceleratedMovement(Player& player, int index)
 
 // Helper to Handle Functions
 
-bool Game::isMatchingKey(Player& player, Screen& room, Door* door) const
+bool GameBase::isMatchingKey(Player& player, Screen& room, Door* door) const
 {
     if (player.checkItem() != KEY)      // False if player doesn't hold a key
         return false;
@@ -1428,9 +1271,9 @@ bool Game::isMatchingKey(Player& player, Screen& room, Door* door) const
     return k.getDoorID() == door->getDoorID();
 }
 
-void Game::updateDoorBySwitches(int id)
-{                                        
-    Screen& room = screens[currRoomID];   
+void GameBase::updateDoorBySwitches(int id)
+{
+    Screen& room = screens[currRoomID];
     Door& d = room.getDoorById(id);
 
     const auto& switches = room.getSwitches();
@@ -1447,7 +1290,7 @@ void Game::updateDoorBySwitches(int id)
     }
 
     // Update the switchOK flag by the door's rule
-    if (d.getRule() == ALL_ON)      
+    if (d.getRule() == ALL_ON)
     {
         d.updateSwitchOK(total == countOn);
     }
@@ -1457,7 +1300,7 @@ void Game::updateDoorBySwitches(int id)
     }
 }
 
-void Game::explodeBomb(Point center) {
+void GameBase::explodeBomb(Point center) {
     Screen& room = screens[currRoomID];    // *Developed with ChatGPT assistance*
     room.removeBombAt(center);
 
@@ -1481,7 +1324,7 @@ void Game::explodeBomb(Point center) {
                 break;
             }
             if (room.removeBombAt(p)) explodeBomb(p);
-            room.removeObjectsAt(p); 
+            room.removeObjectsAt(p);
 
             for (auto& player : players) {
                 if (player.getPos() == p) {
@@ -1493,8 +1336,8 @@ void Game::explodeBomb(Point center) {
     }
 }
 
-Spring* Game::findAdjacentSpring(const Point& pos)
-{         
+Spring* GameBase::findAdjacentSpring(const Point& pos)
+{
     // Finds a spring adjacent to the given position (checks UP/DOWN/LEFT/RIGHT).
     Screen& room = screens[currRoomID];
 
@@ -1506,10 +1349,10 @@ Spring* Game::findAdjacentSpring(const Point& pos)
     Spring* sp;
 
     sp = room.getSpringAt(up);
-    
+
     if (sp)
         return sp;
-    
+
     sp = room.getSpringAt(down);
     if (sp)
         return sp;
@@ -1525,7 +1368,7 @@ Spring* Game::findAdjacentSpring(const Point& pos)
     return nullptr;
 }
 
-bool Game::compressSpring(Player& player, Spring& sp)
+bool GameBase::compressSpring(Player& player, Spring& sp)
 {
     // Compresses the spring by removing its tip and updating player / spring state.
     Screen& room = screens[currRoomID];
@@ -1542,7 +1385,7 @@ bool Game::compressSpring(Player& player, Spring& sp)
 
 }
 
-void Game::launchPlayer(Player& player, Spring& sp)
+void GameBase::launchPlayer(Player& player, Spring& sp)
 {
     // Total compression force accumulated by the player
     int force = sp.springRelease();
@@ -1557,7 +1400,7 @@ void Game::launchPlayer(Player& player, Spring& sp)
 
 }
 
-int Game::calcForce(const Player& pusher, const Obstacle* ob, Direction dir) const
+int GameBase::calcForce(const Player& pusher, const Obstacle* ob, Direction dir) const
 {
     int force = pusher.getSpeed();
 
@@ -1592,7 +1435,7 @@ int Game::calcForce(const Player& pusher, const Obstacle* ob, Direction dir) con
     return force;
 }
 
-bool Game::canMoveObstacle(const std::vector<Point>& nextBody, const Obstacle* currOb)
+bool GameBase::canMoveObstacle(const std::vector<Point>& nextBody, const Obstacle* currOb)
 {
     Screen& room = screens[currRoomID];
 
@@ -1623,7 +1466,7 @@ bool Game::canMoveObstacle(const std::vector<Point>& nextBody, const Obstacle* c
     return true;
 }
 
-bool Game::chainPushSuccess(int idx, Direction dir, const Point& obstaclePos)
+bool GameBase::chainPushSuccess(int idx, Direction dir, const Point& obstaclePos)
 {
     Screen& room = screens[currRoomID];
     Obstacle* ob = room.getObstacleAt(obstaclePos);
@@ -1642,4 +1485,30 @@ bool Game::chainPushSuccess(int idx, Direction dir, const Point& obstaclePos)
 
     // push is real and will happen
     return true;
+}
+
+void GameBase::processKey(char ch) {
+    char c=std::toupper(ch);
+
+    // Dispose keys (bomb/key usage)
+    if (players[PLAYER_1].isDisposeKey(c)) {
+
+        handleDispose(players[PLAYER_1]);
+        return;
+    }
+
+    if (players[PLAYER_2].isDisposeKey(c)) {
+
+        handleDispose(players[PLAYER_2]);
+        return;
+    }
+    // Movement keys
+    if (players[PLAYER_1].isMoveKey(c)){
+
+        players[PLAYER_1].setDir(c);
+    }
+    if (players[PLAYER_2].isMoveKey(c)){
+
+        players[PLAYER_2].setDir(c);
+    }
 }

@@ -69,7 +69,7 @@ void Player::setDir(const char ch)
 
 		// only side move and forced direction is allowed
 		if (requestDir == forcedDir)
-			return; // асеш "мдайх тег чгйод" йгрйъ
+			return; // пїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ" пїЅпїЅпїЅпїЅпїЅ
 	}
 
 	dir = requestDir;
@@ -106,14 +106,14 @@ Point Player::getNextPos() const
 
 void Player::draw() const
 {
-	Utils::gotoxy(pos.getX(), pos.getY());
+	Utils::gotoxy(pos);
 	std::cout << figure;
 
 }
 
 void Player::erase() const
 {
-	Utils::gotoxy(pos.getX(), pos.getY());
+	Utils::gotoxy(pos);
 	std::cout << ' ';
 }
 

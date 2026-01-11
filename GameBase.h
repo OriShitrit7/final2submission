@@ -1,4 +1,5 @@
 #pragma once
+#include "GameBase.h"
 #include "Utils.h"
 #include "GameDefs.h"
 #include "Screen.h"
@@ -14,39 +15,41 @@
 #include <sstream>
 #include <algorithm>
 
-class Game {
+class GameBase {
 private:
 
     static constexpr int NUM_PLAYERS = 2;
 
-    std::vector<Screen> screens;       // Array of all the avialable screens \ rooms
+    std::vector<Screen> screens;       // Array of all the available screens \ rooms
 
     Screen fixedScreens[NUM_SCREENS];  // Constant screens like menu\instructions
     int currRoomID;
 
     Player players[NUM_PLAYERS];       // Array of players in game
-    int playerRoom[NUM_PLAYERS];       // Which room is each player at 
+    int playerRoom[NUM_PLAYERS];       // Which room is each player at
     int roomsDone[NUM_PLAYERS];        // How many rooms did each player finish
     bool playerFinished[NUM_PLAYERS];  // Arr to follow the players who finished the game
-    Point prevPos[NUM_PLAYERS];         
+    Point prevPos[NUM_PLAYERS];
 
-    bool isRunning;     // True as long as player doesnt press pause or exit
+    bool isRunning;     // True as long as player doesn't press pause or exit
     bool gameOver;      // True when all players finish 2 rooms
+    size_t gameCycles=0;
 
-    // Functions 
+public:
 
+    // Functions
     void initGame();
     bool loadGameFiles();
     bool initGameFiles(std::vector<std::string>& outFiles);
     bool loadRiddles();
     bool loadRiddles(int loadRoomID);
 
-    void handleInput();
     void run();
     void update();
     void render();
-    void pauseGame();
-  
+
+    virtual void delay(int ms);
+
     void displayLegend(const Screen& room);
     void displayFinalScoreboard() const;
     void drawPlayers();
@@ -54,22 +57,29 @@ private:
     bool restartCurrentRoom();
     bool reloadRoom(int roomID);
 
-
-public:
-    Game();       // ctor
+    GameBase()=default;       // ctor
+    virtual ~GameBase()=default;// d-ctor
     void setGame();
-    ~Game();      // d-ctor
+    void setRunning(bool option) {isRunning=option;}
+
+    // Virtual
+    virtual void handleInput() = 0;
+    virtual int getDelay() = 0;
+
+    size_t getGameCycle() const {return gameCycles;}
+
+    // might need: getPlayer, getGameOver, getIsRunning getters etc
+
 
     // Game Loop Functions
     void moveRoom(Player& p, int dest);
     Point getStartPoint(Player& player, int idx) const;
     bool playersCollide(int currPlayerIndex, const Point& nextPos);
     void applyLifeLoss(Player& player);
-    bool isFinalRoom(int dest) { return dest == screens.size() - 1; }
+    bool isFinalRoom(int dest) const { return dest == screens.size() - 1; }
+    size_t getGameCycles() const {return gameCycles;}
 
     // Set Game Functions
-    void showMenu();
-    void showInstructions();
     void showError(const std::string& msg);
     void showMessage(const std::string& msg);
 
@@ -98,4 +108,5 @@ public:
     bool canMoveObstacle(const std::vector<Point>& nextBody, const Obstacle* currOb);
     bool chainPushSuccess(int idx, Direction dir, const Point& obstaclePos);
 
+    void processKey(char ch);
 };

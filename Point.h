@@ -26,11 +26,6 @@ public:
 		return x < other.x;
 	}
 
-	bool isAt(const Point& p) const {   // Comparing positions
-		return x == p.getX() &&
-			y == p.getY();
-	}
-
 	Point next(Direction dir) const;             // Returns the next position when moving one step in the given direction.
 	static bool checkLimits(const Point& p);     // Checks whether a point is inside the screen limits. 
 	static bool areOpposite(Direction d1, Direction d2);   // Returns true if two directions are opposite to each other.

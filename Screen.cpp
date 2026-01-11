@@ -201,7 +201,7 @@ bool Screen::parseDataLine(const std::string& line, std::string& errorMsg)
 
 	ss >> type;
 	int x, y;
-	std::string tmp;    // if theres a problem check if its ok
+	std::string tmp;    // if there's a problem check if it's ok
 
 	if (type == "DARK")
 	{
@@ -486,7 +486,7 @@ void Screen::collectObstacleDFS(int x, int y, bool visited[][SCREEN_HEIGHT], std
 
 	// Mark cell as visited and add it to the obstacle body
 	visited[x][y] = true;
-	body.push_back(Point(x, y));
+	body.emplace_back(x, y);
 
 	// Explore neighboring cells
 	collectObstacleDFS(x + 1, y, visited, body);
@@ -619,7 +619,7 @@ void Screen::drawChar(const Point& p,const char c)
     board[p.getX()][p.getY()] = c;
 	if (isVisible(p))
 	{
-		Utils::gotoxy(p.getX(), p.getY());
+		Utils::gotoxy(p);
 		std::cout << c;
 	}
 }
@@ -826,14 +826,14 @@ ItemType Screen::getItemType(const Point& p) const
 Door& Screen::getDoorById(int id)
 {
 	// Search by logical doorID
-	for (int i = 0; i < doors.size(); i++)
+	for (auto & door : doors)
 	{
-		if (doors[i].getDoorID() == id)
+		if (door.getDoorID() == id)
 		{
-			return doors[i];
+			return door;
 		}
 	}
-	throw std::runtime_error("Error: Door ID not found in getDoorById");   // needed otherwise get error on mac
+	throw std::runtime_error("Error: Door ID not found in getDoorById");   // needed otherwise get error on Mac
 }
 
 
@@ -852,7 +852,7 @@ Point Screen::getTeleportDest(const Point& p) const { // returns portal dest
 void Screen::collectKey(Player& player, const Point& p)
 {
 	for (int i = 0; i < keys.size(); i++) {
-		if (keys[i].isActive() && keys[i].getPos().isAt(p)) {
+		if (keys[i].isActive() && keys[i].getPos()==p) {
 
 			player.collectItem(KEY, i);
 			keys[i].deactivate();
@@ -865,7 +865,7 @@ void Screen::collectKey(Player& player, const Point& p)
 void Screen::collectBomb(Player& player, const Point& p)
 {
 	for (int i = 0; i < bombs.size(); i++) {
-		if (bombs[i].isActive() && !bombs[i].isTicking() && bombs[i].getPos().isAt(p)) {
+		if (bombs[i].isActive() && !bombs[i].isTicking() && bombs[i].getPos()==p) {
 
 			player.collectItem(BOMB, i);
 			bombs[i].deactivate();
@@ -879,7 +879,7 @@ void Screen::collectTorch(Player& player, const Point& p)
 {
 	for (int i = 0; i < torches.size(); i++)
 	{
-		if (torches[i].isActive() && torches[i].getPos().isAt(p))
+		if (torches[i].isActive() && torches[i].getPos()==p)
 		{
 			player.collectItem(TORCH, i);
 			torches[i].deactivate();

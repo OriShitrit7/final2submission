@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <string>
+#include "Point.h"
 
 #ifdef _WIN32
 #include <conio.h>
@@ -15,6 +16,7 @@
 #endif
 
 namespace Utils {
+    void gotoxy(Point pos);
     void gotoxy(int x, int y);
     bool hasInput();
     char getChar();
