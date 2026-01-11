@@ -11,7 +11,7 @@ public:
     static Results loadResults(const std::string& filename);
     void saveResults(const std::string& filename) const;
     void addResult(size_t iteration, ResultValue result) {
-        results.push_back({ iteration, result });
+        results.emplace_back( iteration, result );
     }
     std::pair<size_t, ResultValue> popResult() {
         if (results.empty()) return { 0, Results::noResult };

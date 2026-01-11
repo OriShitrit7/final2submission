@@ -18,9 +18,7 @@ public:
 	}
 
 	// Set Functions
-	void setPos(Point pos) {
-		this->pos = pos;
-	}
+	void setPos(Point _pos) {pos = _pos;}
 	void setDoorId(int id) { DoorID = id; }
 
 	// Get Functions

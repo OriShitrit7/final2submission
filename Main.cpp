@@ -3,10 +3,7 @@
 #include "GameBase.h"
 
 int main(int argc, char* argv[]) {
-	bool saveMode = false;
-	bool loadMode = false;
-	bool silentMode = false;
-
+	bool saveMode, loadMode, silentMode = false;
 
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-save") == 0) saveMode = true;
@@ -14,16 +11,15 @@ int main(int argc, char* argv[]) {
 		if (strcmp(argv[i], "-silent") == 0) silentMode = true;
 	}
 
-
 	if (loadMode) {
 		FileGame game(silentMode);
 		game.run();
 	}
+
 	else {
 		KeyboardGame game(saveMode);
 		game.showMenu();
 	}
-
 
 	return 0;
 }

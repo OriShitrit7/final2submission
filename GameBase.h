@@ -17,12 +17,9 @@
 
 class GameBase {
 private:
-
     static constexpr int NUM_PLAYERS = 2;
-
     std::vector<Screen> screens;       // Array of all the available screens \ rooms
 
-    Screen fixedScreens[NUM_SCREENS];  // Constant screens like menu\instructions
     int currRoomID;
 
     Player players[NUM_PLAYERS];       // Array of players in game
@@ -60,12 +57,21 @@ public:
     GameBase()=default;       // ctor
     virtual ~GameBase()=default;// d-ctor
     void setGame();
-    void setRunning(bool option) {isRunning=option;}
+    void setRunning(const bool option) {isRunning=option;}
+    void setGameOver(const bool option) {gameOver=option;}
 
     // Virtual
     virtual void handleInput() = 0;
     virtual int getDelay() = 0;
+    // those funcs should divide to writing to screen (Keyboard version) and to file (File version)
+    virtual void onScreenChange(Player p, int room) = 0;
+    virtual void onLifeLost(Player p) = 0;
+    virtual void onRiddle(Player p, bool correct) = 0;
+    virtual void onGameEnd() = 0;
+    virtual int getDelay() const = 0;
 
+    Player* getPlayersArr() {return players;}
+    std::vector<Screen>* getScreenArr() {return &screens;}
     size_t getGameCycle() const {return gameCycles;}
 
     // might need: getPlayer, getGameOver, getIsRunning getters etc
@@ -75,13 +81,15 @@ public:
     void moveRoom(Player& p, int dest);
     Point getStartPoint(Player& player, int idx) const;
     bool playersCollide(int currPlayerIndex, const Point& nextPos);
-    void applyLifeLoss(Player& player);
+    virtual void applyLifeLoss(Player& player);
     bool isFinalRoom(int dest) const { return dest == screens.size() - 1; }
     size_t getGameCycles() const {return gameCycles;}
 
+    /*// maybe we'll need to make those virtual as well for writing bugs to file
     // Set Game Functions
     void showError(const std::string& msg);
     void showMessage(const std::string& msg);
+    */
 
     // Handle Functions
     void handleDoor(Player& player);
