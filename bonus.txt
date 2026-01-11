@@ -1,0 +1,13 @@
+Bonuses
+- Applicated the "shielded by wall" feature  
+
+- Added an option to restart room by pressing a certain key
+
+- New element : Teleporter (^)
+A teleporter consists of two linked points on the screen. 
+When the player enters one point, they instantly appear at the other. 
+This allows access to otherwise unreachable areas. 
+
+-The game is designed with cross-platform support, using conditional compilation 
+to handle platform-specific features (input handling, console operations) 
+for both Windows and macOS.
