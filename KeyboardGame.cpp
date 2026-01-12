@@ -1,5 +1,4 @@
 #include "KeyboardGame.h"
-// יכול להיות שצריכים לקרוא בלולאת משחק כל פעם עם player כארגומנט
 
 KeyboardGame::KeyboardGame() {
     Utils::initConsole();
@@ -12,8 +11,7 @@ KeyboardGame::KeyboardGame() {
 }
 
 
-void KeyboardGame::handleInput()
-{
+void KeyboardGame::handleInput() {
     if (!Utils::hasInput())   // no key pressed this frame
         return;
 
@@ -22,29 +20,22 @@ void KeyboardGame::handleInput()
 
     // If the game is already over (final room):
     // only 'H' should work and return to the main menu
-    if (gameOver)
-    {
+    if (gameOver) {
         if (c == HOME)
-        {
             isRunning = false;      // leave run() and go back to menu
-        }
         return;                     // ignore all other keys in final room
     }
     // Pause the game
-    if (c == ESC)
-    {
+    if (c == ESC) {
         pauseGame();
         return;
     }
 
     // Player wants to restart room
-    if (c == RESTART)
-    {
-        if (!restartCurrentRoom()){
+    if (c == RESTART) {
+        if (!restartCurrentRoom())
+            isRunning=false;
 
-            isRunning = false;
-            return;
-        }
         return;
     }
     processKey(ch);
@@ -54,16 +45,14 @@ void KeyboardGame::showMenu() // is it only KeyBoardGame's function?
 {
     char choice = '\0';
 
-    while (true)
-    {
+    while (true) {
         fixedScreens[MENU_SCREEN].drawBase();
         std::cout << std::flush;
 
         char ch = Utils::getChar();
         choice = std::toupper(ch);
 
-        switch (choice)
-        {
+        switch (choice) {
         case START: // Start new game
             initGame();          // prepares the game - map, objects, players
 
@@ -78,7 +67,7 @@ void KeyboardGame::showMenu() // is it only KeyBoardGame's function?
             break;
 
         case EXIT:    // Exit game
-            setRunning(false);
+            isRunning=false;
             return;
 
         default:
@@ -145,83 +134,66 @@ void KeyboardGame::showInstructions()
 }
 
 // Restart Functions
-
-bool KeyboardGame::restartCurrentRoom()
-{
+bool KeyboardGame::restartCurrentRoom() {
     // Final room does not support restart
-    if (isFinalRoom(currRoomID)) // צריך לטפל במקרה שאנחנו בfileGame
-    {
-        return true;
-    }
+    if (isFinalRoom(currRoomID)) return true;
+
     // Clear current room state
     screens[currRoomID].clearRoom();
     // Reload room from original file
-    if (!reloadRoom(currRoomID))
-    {
-        return false;
-    }
+    if (!reloadRoom(currRoomID)) return false;
+
     // Reset players that are currently in this room
-    for (int i = 0; i < NUM_PLAYERS; ++i)
-    {
+    for (int i = 0; i < NUM_PLAYERS; ++i) {
         if (playerRoom[i] == currRoomID)
             players[i].resetForRoom();
     }
     return true;
 }
 
-bool KeyboardGame::reloadRoom(int roomID) //
-{
-    // Reloads a specific room from its original source file.
-    std::vector<Screen> *screens = getScreenArr();
-    if (roomID < 0 || roomID >= screens->size())
+// Reloads a specific room from its original source file.
+bool KeyboardGame::reloadRoom(int roomID) {
+    if (roomID < 0 || roomID >= screens.size())
         return false;
 
     std::string error, warning;
     const std::string& filename = screens[roomID].getSourceFile();
     // Room has no associated file (e.g., final room)
-    if (filename.empty())
-    {
-        showError("Restarting room failed");
+    if (filename.empty()) {
+        handleError("Restarting room failed");
         return false;
     }
     // Reload screen from file
     if (!screens[roomID].loadScreenFromFile(filename, error, warning)) {
-        showError(error);
+        handleError(error);
         return false;
     }
-    if (!loadRiddles(roomID))
-    {
-        return false;
-    }
-    if (!screens[roomID].validateLegendPlacement(error))
-    {
-        showError(error);
-        return false;
-    }
-    screens[roomID].clearLegendAreaFromBoard();
 
+    if (!loadRiddles(roomID))
+        return false;
+
+    if (!screens[roomID].validateLegendPlacement(error)) {
+        handleError(error);
+        return false;
+    }
+
+    screens[roomID].clearLegendAreaFromBoard();
     return true;
 }
 
-void KeyboardGame::showError(const std::string& msg)
-{
+void KeyboardGame::handleError(const std::string& msg) {
     Utils::clearScreen();
 
     std::string line1, line2;
     bool foundNewline = false;
 
-    for (size_t i = 0; i < msg.length(); i++)
-    {
-        if (msg[i] == '\n')
-        {
+    for (size_t i = 0; i < msg.length(); i++) {
+        if (msg[i] == '\n') {
             foundNewline = true;
             continue;
         }
 
-        if (!foundNewline)
-            line1 += msg[i];
-        else
-            line2 += msg[i];
+        (!foundNewline)?(line1 += msg[i]):(line2 += msg[i]);
     }
 
     std::string errorTitle = "ERROR:";
@@ -233,8 +205,7 @@ void KeyboardGame::showError(const std::string& msg)
     Utils::gotoxy(xLine1, 12);
     std::cout << line1;
 
-    if (!line2.empty())
-    {
+    if (!line2.empty()) {
         int xLine2 = (SCREEN_WIDTH - line2.length()) / 2;
         Utils::gotoxy(xLine2, 13);
         std::cout << line2;
@@ -249,16 +220,13 @@ void KeyboardGame::showError(const std::string& msg)
     Utils::getChar();
 }
 
-void KeyboardGame::showMessage(const std::string& msg)
-{
+void KeyboardGame::handleMessage(const std::string& msg) {
     Utils::clearScreen();
     std::string line1, line2;
     bool foundNewline = false;
 
-    for (size_t i = 0; i < msg.length(); i++)
-    {
-        if (msg[i] == '\n')
-        {
+    for (size_t i = 0; i < msg.length(); i++) {
+        if (msg[i] == '\n') {
             foundNewline = true;
             continue;
         }
@@ -269,12 +237,13 @@ void KeyboardGame::showMessage(const std::string& msg)
     int xLine1 = (SCREEN_WIDTH - line1.length()) / 2;
     Utils::gotoxy(xLine1, 12);
     std::cout << line1;
-    if (!line2.empty())
-    {
+
+    if (!line2.empty()) {
         int xLine2 = (SCREEN_WIDTH - line2.length()) / 2;
         Utils::gotoxy(xLine2, 13);
         std::cout << line2;
     }
+
     std::string pressKey = "Press any key to continue ";
     int xPress = (SCREEN_WIDTH - pressKey.length()) / 2;
     Utils::gotoxy(xPress, 17);
@@ -285,16 +254,14 @@ void KeyboardGame::showMessage(const std::string& msg)
 }
 
 
-void KeyboardGame::applyLifeLoss(Player& player)
-{
+void KeyboardGame::applyLifeLoss(Player& player) {
     // Decrease player's life and check if still alive
     bool stillAlive = player.lowerLife();
 
     // Player has no lives left -> end game
-    if (!stillAlive)
-    {
-        showMessage("Player is dead. Better luck next time... -.-");
-        setGameOver(true);
-        setRunning(false);
+    if (!stillAlive) {
+        handleMessage("Player is dead. Better luck next time... -.-");
+        gameOver=true;
+        isRunning=false;
     }
 }

@@ -1,4 +1,5 @@
 #include "Steps.h"
+#include <fstream>
 
 Steps Steps::loadSteps(const std::string& filename) {
     Steps steps;

@@ -12,6 +12,17 @@
     }
 }*/
 
+void FileGame::handleError(const std::string &msg) {
+    errors.push_back("Cycle " + std::to_string(gameCycles) + ": " + msg);
+    testPassed = false;
+}
+
+void FileGame::handleMessage(const std::string &msg) {
+    if (!silentMode) {
+        //?
+    }
+}
+
 FileGame::FileGame(bool silent) : GameBase(), silentMode(silent) {
     setGame();
 
@@ -22,22 +33,41 @@ FileGame::FileGame(bool silent) : GameBase(), silentMode(silent) {
     initGame();
 }
 
+void FileGame::compareResults() {
+
+}
+
+
+void FileGame::render() {
+    if (!silentMode) GameBase::render();
+}
+
+bool FileGame::loadStepsFromFile() {
+}
 
 
 void FileGame::handleInput() {
-
     if (steps.isEmpty()) { // flag for an error?
-        setRunning(false);      // leave run()
+        isRunning=false;      // leave run()
         return;
     }
 
-    if (steps.isNextStepOnIteration(getGameCycles())) {
+    if (steps.isNextStepOnIteration(gameCycles)) {
         char ch = steps.popStep();
         processKey(ch);
     }
 }
 
-FileGame::FileGame(bool silent) {
+bool FileGame::handleRiddles(Player& player) {
+    if (silentMode) {
+        if (expectedResults.hasNoMoreRiddles()) {
+            handleError("Mismatch: More riddles encountered than expected in results file.");
+            return false;
+        }
+        bool result = expectedResults.getNextRiddleResult();
+        return GameBase::handleRiddles(player, result);
+    }
 
+    return GameBase::handleRiddles(player);
 }
-}
+;

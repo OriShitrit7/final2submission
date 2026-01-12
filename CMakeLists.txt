@@ -29,7 +29,6 @@ add_executable(final2
         Spring.h
         Switch.h
         Templates.h
-        Torch.cpp
         Torch.h
         Utils.cpp
         Utils.h
@@ -38,4 +37,6 @@ add_executable(final2
         KeyBoardGame.h
         KeyBoardGame.cpp
         FileGame.cpp
+        Results.cpp
+        Steps.cpp
 )

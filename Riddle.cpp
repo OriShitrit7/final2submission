@@ -8,10 +8,10 @@ void Riddle::setData(const std::string& q, const std::string& a)
 
 void Riddle::printUI() const { //function helped by GEMINI
     constexpr char BORDER = '?';
-    const int  INDENT = 8;
+    const int INDENT = 8;
     const int WIDTH = (std::max)(static_cast<int>(question.length()) + 4, 44);
 
-    auto printRow = [&](std::string const text = "", bool isLeftAlign = false) {
+    auto printRow = [&](std::string const& text = "", bool isLeftAlign = false) {
         int textLen = static_cast<int>(text.length());
         int padding = WIDTH - 2 - textLen;
 
@@ -37,11 +37,10 @@ void Riddle::printUI() const { //function helped by GEMINI
     Utils::gotoxy(INDENT + 1 + 1 + promptLen, 6);
 }
 
-bool Riddle::solve() {
-    if (solved)
-        return true;
+bool Riddle::solve() { // need to be changed
+    if (solved) return true;
 
-    printUI();
+    printUI(); // what about silent mode?
 
     std::string input;
     std::cin >> input;
@@ -62,9 +61,8 @@ bool Riddle::solve() {
         std::cout << ">>> CORRECT! You may pass. <<<";
         solved = true;
     }
-    else {
+    else
         std::cout << ">>> WRONG! You shall NOT pass. <<<";
-    }
 
     Utils::gotoxy(indent, feedbackRow + 1);
     std::cout << "Press ENTER to continue...";
