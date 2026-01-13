@@ -22,4 +22,5 @@ public:
     }
 
     bool isEmpty() const {return steps.empty();}
+
 };

@@ -1,6 +1,5 @@
 #pragma once
 #include "Point.h"
-#include "Door.h"
 
 class Switch
 {
@@ -28,7 +27,7 @@ public:
 	bool getState() const { return state; }
 	char getFigure() const { return state ? '/' : 'o'; }\
 
-	void toggle()  // Toggles the switch state. If it was ON, it becomes OFF, and vice-versa
+	void toggle()  // Toggles the switch state. If it was ON, it becomes OFF, and vice versa
 	{
 		state = !state;
 	}

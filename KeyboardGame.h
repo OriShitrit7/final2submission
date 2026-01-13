@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Steps.h"
 #include "Results.h"
+#include <vector>
 
 
 class KeyboardGame : public GameBase {
@@ -22,35 +23,36 @@ public:
     KeyboardGame(bool save = false);
     ~KeyboardGame();
 
-    int getDelay() override {return 150;} // was it 150?
-
     void showMenu();
     void showInstructions();
 
+    void drawPlayers();
+
+    void handleError(const std::string& msg) override;
+    void handleMessage(const std::string& msg) override;
+
+    bool restartCurrentRoom();
     bool reloadRoom(int roomID);
 
-    void showError(const std::string &msg);
+    void applyLifeLoss(Player &player) override;
 
-    void showMessage(const std::string &msg);
-
-    void applyLifeLoss(Player &player);
-
-    void onScreenChange(Player p, int room) override {
-        if (saveMode) results.addScreenChange(getGameCycle(), p, room);
+    void onScreenChange(PlayerID id, int room) override {
+        if (saveMode) results.addScreenChange(gameCycles, id, room);
     }
 
-    void onLifeLost(Player p) override {
-        if (saveMode) results.addLifeLost(getGameCycle(), p);
+    void onLifeLost(PlayerID id) override {
+        if (saveMode) results.addLifeLost(gameCycles, id);
     }
 
-    void onRiddle(Player p, bool correct) override {
-        if (saveMode) results.addRiddle(getGameCycle(), p, correct);
+    void onRiddle(PlayerID id, bool correct) override {
+        if (saveMode) results.addRiddle(gameCycles, id, correct);
     }
 
     void onGameEnd() override {
         if (!saveMode) return;
-        Player* players=getPlayersArr();
-        results.addGameEnd(getGameCycle(), players[0].getScore(), players[1].getScore());
+        results.addGameEnd(gameCycles, players[0].getScore(), players[1].getScore());
     }
+
+    int getDelay() const override {return KEYBOARD_DELAY;}
 
 };

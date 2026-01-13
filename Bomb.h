@@ -8,7 +8,7 @@ private:
     char figure = '@'; 
     int timer = 5;           // Countdown until explosion
     bool active;             // True if the bomb exists on the board
-    bool ticking = false;    // True if the timer is currently decreasin
+    bool ticking = false;    // True if the timer is currently decreasing
 
 public:
     Bomb() : pos(0, 0), figure('@'), timer(5), active(false), ticking(false)   // default ctor 

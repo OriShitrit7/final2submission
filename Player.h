@@ -29,14 +29,12 @@ private:
 	Item inventory;               // Currently held item (if any)
 
 public:
-	static const int MAX_SUB_STEPS = 10;
-
 	// Set Functions
 	void setPlayer(const Point& _pos, char _figure,const char keys[6]);
 	void setPos(const Point& p) { pos = p; }
 	void setStartPos(const Point& p) { startPos = pos = p; }
 	void setDirection(Direction _dir) { dir = _dir; }
-	void setDir(const char ch);
+	void setDir(char ch);
 	void setArrowKeys(const char* arrowKeysFig);
 	bool isMoveKey(char c) const;
 	void setDead() { isDead = true; }
@@ -53,7 +51,7 @@ public:
 	int getSpeed() const { return speed; }
 	Direction getDir() const { return dir; }
 	bool getDead() const { return isDead; }
-	bool getDisposeFlag() const { return afterDispose; } 
+	bool getDisposeFlag() const { return afterDispose; }
 	Point& getTeleportPos() { return teleportPos; };
 
 	// Action Functions
@@ -108,7 +106,5 @@ public:
 		respawnTimer = 20;
 		return life > 0;
 	}
-
-
 
 };

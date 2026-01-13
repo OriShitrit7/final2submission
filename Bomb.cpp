@@ -2,12 +2,10 @@
 
 // Arms the bomb at a new position and restarts the timer.
 // The bomb becomes active and ticking immediately.
-void Bomb::arm(const Point& p)
-{
+void Bomb::arm(const Point& p) {
     pos = p;
     timer = 5;     
-    active = true;
-    ticking = true;
+    active = ticking = true;
 }
 
 bool Bomb::tick() {

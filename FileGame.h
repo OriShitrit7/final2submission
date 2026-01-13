@@ -3,51 +3,53 @@
 #include "Steps.h"
 #include "Results.h"
 
+constexpr int FALSE_SILENT_DELAY=10;
+
 class FileGame : public GameBase {
 private:
     bool silentMode;
     Steps steps;
-    Results expectedResults;
-    Results actualResults;
+    Results expectedResults, actualResults;
     bool testPassed;
     int delay;
+    std::vector<std::string> errors;
 
 protected:
     void handleInput() override;
 
-    //void delay() override; // why is it needed?
+    bool handleRiddles(Player &player) override;
+
+    void render() override;
 
     bool loadStepsFromFile();
 
-    void onScreenChange(Player p, int room) override {
-        actualResults.addScreenChange(getGameCycle(), p, room);
+    void onScreenChange(PlayerID id, int room) override {
+        actualResults.addScreenChange(gameCycles, id, room);
     }
 
-    void onLifeLost(Player p) override {
-        actualResults.addLifeLost(getGameCycle(), p);
+    void onLifeLost(PlayerID id) override {
+        actualResults.addLifeLost(gameCycles, id);
     }
 
-    void onRiddle(Player p, bool correct) override {
-        actualResults.addRiddle(getGameCycle(), p, correct);
+    void onRiddle(PlayerID id, bool correct) override {
+        actualResults.addRiddle(gameCycles, id, correct);
     }
 
     void onGameEnd() override {
-        Player* players=getPlayersArr();
-        actualResults.addGameEnd(getGameCycle(),players[0].getScore(), players[1].getScore());
+        actualResults.addGameEnd(gameCycles,players[0].getScore(), players[1].getScore());
     }
 
-    int getDelay() const override { return silentMode ? 0 : 10; }
+    int getDelay() const override { return silentMode ? 0 : FALSE_SILENT_DELAY; }
 
+    void handleError(const std::string& msg) override;
+    void handleMessage(const std::string& msg) override;
 
 public:
-    FileGame(bool silent = false);
+    explicit FileGame(bool silent);
+
     ~FileGame();
 
     bool didTestPass() const { return testPassed; }
     void compareResults();
-
-    int getDelay(){return silentMode?0:50;}
-
-    //bool loadStepsFromFile(const std::string& filename) {steps=loadSteps();}
 
 };

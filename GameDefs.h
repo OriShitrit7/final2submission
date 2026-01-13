@@ -11,7 +11,11 @@ static constexpr int MAX_Y = 24;
 static constexpr int LEGEND_HEIGHT = 5;
 static constexpr int LEGEND_WIDTH  = 23;
 
+static constexpr int NUM_PLAYERS = 2;
+static constexpr int KEYBOARD_DELAY = 150;
+static constexpr int MAX_SUB_STEPS = 10;
 
+// should we move it into KeyboardGame?
 // Input Keys Constants
 constexpr char HOME    = 'H';
 constexpr char RESTART = 'R';
@@ -87,8 +91,7 @@ constexpr int BOMB_BLAST_RADIUS = 3;
 
 // Score\Lives panel
 
-enum class ScoreEvent
-{
+enum class ScoreEvent{
     UseKey,
     OpenDoor,
     SolveRiddle,
@@ -102,15 +105,13 @@ constexpr int SCORE_SOLVE_RIDDLE  = 10;
 constexpr int SCORE_FINISH_FIRST  = 100;
 constexpr int SCORE_FINISH_SECOND = 50;
 
-inline int scoreValue(ScoreEvent e)
-{
-    switch (e)
-    {
-    case ScoreEvent::UseKey:            return SCORE_USE_KEY;
-    case ScoreEvent::OpenDoor:          return SCORE_OPEN_DOOR;
-    case ScoreEvent::SolveRiddle:       return SCORE_SOLVE_RIDDLE;
-    case ScoreEvent::FinishGameFirst:   return SCORE_FINISH_FIRST;
-    case ScoreEvent::FinishGameSecond:  return SCORE_FINISH_SECOND;
+inline int scoreValue(ScoreEvent e) {
+    switch (e) {
+        case ScoreEvent::UseKey:            return SCORE_USE_KEY;
+        case ScoreEvent::OpenDoor:          return SCORE_OPEN_DOOR;
+        case ScoreEvent::SolveRiddle:       return SCORE_SOLVE_RIDDLE;
+        case ScoreEvent::FinishGameFirst:   return SCORE_FINISH_FIRST;
+        case ScoreEvent::FinishGameSecond:  return SCORE_FINISH_SECOND;
     }
     return 0;
 }

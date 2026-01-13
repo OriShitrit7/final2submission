@@ -2,8 +2,7 @@
 #include "GameDefs.h"
 
 // Represents a 2D position on the screen/board.
-class Point
-{
+class Point {
 private:
 	int x, y;   // coordinates
 
@@ -15,9 +14,11 @@ public:
 	bool operator==(const Point& other) const {
 		return x == other.x && y == other.y;
 	}
+
 	bool operator!=(const Point& other) const {
 		return !(*this == other);
 	}
+
 	int getX() const { return x; }
 	int getY() const { return y; }
 
@@ -31,5 +32,4 @@ public:
 	static bool areOpposite(Direction d1, Direction d2);   // Returns true if two directions are opposite to each other.
 	static Direction opposite(Direction dir);
 
-	
 };
