@@ -137,10 +137,14 @@ void Player::accel(int force, Direction spDir) {  // Sets forced movement
 }
 
 // Handles collision between players.
+<<<<<<< HEAD
 void Player::bumpedInto(Player& other) // *Logic reviewed with ChatGPT assistance*
 {        
 	if (this->isAccelerating() and other.isAccelerating())
 		return;
+=======
+void Player::bumpedInto(Player& other) const {// *Logic reviewed with ChatGPT assistance*
+>>>>>>> 1dd256c (Update project with latest files)
 	// If the moving player is under spring acceleration:
 	if (this->isAccelerating())
 	{                              // transfer the same speed, direction and acceleration to the other player.

@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Bomb.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Obstacle.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Point.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Riddle.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Screen.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Spring.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="GameBase.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyboardGame.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="FileGame.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Results.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Steps.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Obstacle.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Bomb.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Door.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="GameDefs.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Key.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Maps.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Riddle.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Screen.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Spring.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Switch.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Templates.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Torch.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="GameBase.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="FileGame.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyboardGame.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Results.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Steps.h">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="header">
+      <UniqueIdentifier>{d0e5f755-a803-49ec-a0d9-0e7f8fde327a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{0f9baefe-ea0a-419d-8d86-b2f5485bb4f5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -86,10 +86,15 @@ inline char itemTypeToChar(ItemType type)
 enum SwitchRule { ALL_ON, ALL_OFF, NO_RULE };  // combinations of switches to open the door:
 constexpr int BOMB_BLAST_RADIUS = 3;
 
+<<<<<<< HEAD
 // Score\Lives panel
 
 enum class ScoreEvent
 {
+=======
+// Event enum used for player's score
+enum class ScoreEvent{
+>>>>>>> 1dd256c (Update project with latest files)
     UseKey,
     OpenDoor,
     SolveRiddle,

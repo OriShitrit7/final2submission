@@ -10,21 +10,14 @@ private:
 	char figure = '*';
 
  public:
-     // default ctor
-     Obstacle()
-         : body()
-     {
-     }
-     // custom ctor
-     Obstacle(const std::vector<Point>& _body)
-         : body(_body)
-     {
-     }
+     Obstacle() : body() {}      // default ctor
+     explicit Obstacle(const std::vector<Point>& _body)  // custom ctor
+         : body(_body) {}
 	 
      // Get Functions
      std::vector<Point>& getBody() { return body; }    // Non-const & const access to obstacle body
      const std::vector<Point>& getBody() const { return body; }   
-	 int getSize() const { return (int)body.size(); }  // casting
+	 int getSize() const { return static_cast<int>(body.size()); }  // casting
      char getFigure() const { return figure; }
 
      bool isObBody(const Point& p) const;

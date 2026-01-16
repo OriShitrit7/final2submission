@@ -61,6 +61,7 @@ public:
 	void erase() const;
 	void move();
 	void accel(int force, Direction spDir);
+
 	bool isAccelerating() const { return accelTimer > 0; }
 	void stopAcceleration() {
 		accelTimer = 0;
@@ -68,7 +69,7 @@ public:
 		speed = 1;
 	}
 
-	void bumpedInto(Player& otherP);
+	void bumpedInto(Player& other) const;
 	int getAccelerationSubSteps(Point subSteps[MAX_SUB_STEPS]) const;
 	void tickAcceleration();
 	void respawn();
