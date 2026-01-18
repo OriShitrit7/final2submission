@@ -4,6 +4,7 @@
 template <typename T> //means the next func isn't a reg func, it's a template
 T* getItemAt(std::vector<T>& list, const Point& p) { //'T' is deduced automatically based on the vector passed
 	for (auto& item : list) {
+
 		if (item.getPos() == p) return &item;
 	}
 	return nullptr; //item wasn't found

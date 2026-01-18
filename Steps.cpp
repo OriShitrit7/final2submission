@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 
+
 void Steps::addStep(size_t iteration, char step) {   
 
     if (!steps.empty() && steps.back().second == step)   // Ignore repeated direction
@@ -9,34 +10,18 @@ void Steps::addStep(size_t iteration, char step) {
 
     steps.emplace_back(iteration, step); // Adds a step with its iteration
 }
-
 Steps* Steps::loadSteps(std::ifstream& file) {
-
+    Steps* steps = new Steps();
     std::string line;
 
-    // Skip empty lines and search for "steps" header
-    while (std::getline(file, line)) {
-        if (!line.empty() && line == "steps")
-            break;
-    }
-
-    // If we reached EOF without finding "steps"
-    if (file.eof())
-        return nullptr;
-
-    Steps* steps = new Steps();
-
-    // Read steps: "<iteration> <key>"
     while (std::getline(file, line)) {
         if (line.empty())
-            continue; // ignore blank lines inside the section
+            continue;
 
         std::istringstream iss(line);
-
         size_t iteration;
         char key;
 
-        // Parse a single step line
         if (!(iss >> iteration >> key)) {
             delete steps;
             return nullptr;
@@ -44,7 +29,6 @@ Steps* Steps::loadSteps(std::ifstream& file) {
 
         steps->addStep(iteration, key);
     }
-
     return steps;
 }
 

@@ -1,12 +1,11 @@
-#include "Game.h"
+#include "FileGame.h"
+#include "KeyboardGame.h"
+#include "GameBase.h"
 
-<<<<<<< HEAD
-int main()
-{
-	Game game;
-=======
 int main(int argc, char* argv[]) {
-	bool saveMode, loadMode, silentMode = false;
+	bool saveMode = false;
+	bool loadMode = false;
+	bool silentMode = false;
 
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-save") == 0) saveMode = true;
@@ -25,8 +24,6 @@ int main(int argc, char* argv[]) {
 		KeyboardGame game(saveMode);
 		game.showMenu();
 	}
->>>>>>> 1dd256c (Update project with latest files)
 
 	return 0;
 }
-

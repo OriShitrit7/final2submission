@@ -6,7 +6,7 @@ void Riddle::setData(const std::string& q, const std::string& a)
     answer = a;
 }
 
-void Riddle::printUI() const { //function helped by GEMINI
+void Riddle::printUI() const {     //function helped by GEMINI
     constexpr char BORDER = '?';
     const int  INDENT = 8;
     const int WIDTH = (std::max)(static_cast<int>(question.length()) + 4, 44);
@@ -41,6 +41,9 @@ bool Riddle::solve() {
     if (solved)
         return true;
 
+    Utils::clearScreen();
+    Utils::restoreConsole();
+
     printUI();
 
     std::string input;
@@ -53,6 +56,7 @@ bool Riddle::solve() {
     std::string formattedInput = "|" + cleanInput + "|";
 
     bool isCorrect = (formattedAnswer.find(formattedInput) != std::string::npos);
+    lastInput = input;
 
     int feedbackRow = 8;
     int indent = 8;
@@ -71,6 +75,10 @@ bool Riddle::solve() {
 
     std::cin.ignore();
     std::cin.get();
+
+    // Restore screen after riddle interaction
+    Utils::initConsole();
+    Utils::clearScreen();
 
     return solved;
 }

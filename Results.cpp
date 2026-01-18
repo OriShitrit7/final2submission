@@ -29,25 +29,14 @@ bool Results::ResultEntry::operator==(const ResultEntry& other) const
 	return false;
 }
 
-Results* Results::loadResults(std::ifstream& file){
-	std::string line;
-
-	// Search for "results" section header (skip empty / unrelated lines)
-	while (std::getline(file, line)) {
-		if (!line.empty() && line == "results")
-			break;
-	}
-
-	// "results" header not found
-	if (file.eof())
-		return nullptr;
-
+Results* Results::loadResults(std::ifstream& file) {
 	Results* results = new Results();
+	std::string line;
 
 	// Read result entries line by line
 	while (std::getline(file, line)) {
 		if (line.empty())
-			break;  // end of results section
+			continue;  
 
 		// Parse single result entry
 		if (!results->parseResultLine(line)) {
@@ -67,7 +56,9 @@ bool Results::parseResultLine(const std::string& line)
 
 	// Parse common prefix: iteration + result type
 	if (!(iss >> iteration >> type))
+	{
 		return false;
+	}
 
 	if (type == "ScreenChange") {  // Screen changeP: <iteration> ScreenChange <screenId>
 		int screenId;
@@ -91,13 +82,24 @@ bool Results::parseResultLine(const std::string& line)
 		if (!(iss >> std::quoted(riddle) >> std::quoted(answer) >> correct))
 			return false;
 
-		addRiddle(iteration, riddle, answer, correct);
+		addRiddleRes(iteration, riddle, answer, correct);
 	}
 	else {   // Unknown result type
 		return false;
 	}
 
 	return true;
+}
+
+bool Results::getRiddleAtIteration(size_t iter, std::string& answer) const
+{
+	for (const auto& [it, e] : results) {
+		if (it == iter && e.type == ResultType::Riddle) {
+			answer = e.answer;   // answer from file
+			return true;
+		}
+	}
+	return false;
 }
 
 bool Results::saveResults(const std::string& filename,
@@ -124,21 +126,21 @@ bool Results::saveResults(const std::string& filename,
 
 		switch (res.type) {
 		case ResultType::ScreenChange:
-			file << "SCREEN_CHANGE " 
+			file << "ScreenChange" << ' ' 
 				<< res.screenId;
 			break;
 
 		case ResultType::LostLife:
-			file << "LOST_LIFE";
+			file << "LostLife";
 			break;
 
 		case ResultType::Riddle:
-			file << "RIDDLE " 
-				<< res.riddle << ' ' << res.answer << ' ' << res.correct;
+			file << "Riddle" << ' ' 
+				<< quoted(res.riddle) << ' ' << quoted(res.answer) << ' ' << res.correct;
 			break;
 
 		case ResultType::GameEnd:
-			file << "GAME_END "
+			file << "GameEnd" << ' ' 
 				<< res.score;
 			break;
 		}

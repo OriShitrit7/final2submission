@@ -5,7 +5,7 @@
 #include <fstream>
 
 class Results {
-public:
+private:
     enum class ResultType { ScreenChange, LostLife, Riddle, GameEnd };
 
     struct ResultEntry {
@@ -32,13 +32,15 @@ public:
 
         bool operator==(const ResultEntry& other) const;
     };
-private:
     std::list<std::pair<size_t, ResultEntry>> results;    // pair: <iteration, result entry>
+
     bool parseResultLine(const std::string& line);
 
 public:
     const std::list<std::pair<size_t, Results::ResultEntry>>&
         getResults() const { return results; }
+
+    bool getRiddleAtIteration(size_t iter, std::string& answer) const;
 
     void addResult(size_t iteration, const ResultEntry& entry) {
         results.push_back({ iteration, entry });
@@ -53,7 +55,7 @@ public:
     void addGameEnd(size_t iteration, int finalScore){
         addResult(iteration, ResultEntry(ResultType::GameEnd, finalScore, true));
     }
-    void addRiddle(size_t iteration, const std::string& riddle, 
+    void addRiddleRes(size_t iteration, const std::string& riddle, 
         const std::string& answer, bool correct) {
         addResult(iteration, ResultEntry(ResultType::Riddle, riddle, answer, correct));
     }

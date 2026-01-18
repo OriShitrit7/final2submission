@@ -1,12 +1,13 @@
 #include "KeyboardGame.h"
 
-    KeyboardGame::KeyboardGame(bool saveMode) {
+KeyboardGame::KeyboardGame(bool _saveMode) :GameBase() {
        Utils::initConsole();
+       this->saveMode = _saveMode;
 
        fixedScreens[MENU_SCREEN].setMap(MENU_MAP);
        fixedScreens[INSTRUCTIONS_SCREEN].setMap(INSTRUCTIONS_MAP);
 
-       if (saveMode) {  // recording steps & results
+       if (_saveMode) {  // recording steps & results
            setSteps(new Steps());
            setResults(new Results());   
        }
@@ -16,17 +17,20 @@
 
 }
 
+KeyboardGame::~KeyboardGame() = default;
 
-    void KeyboardGame::handleInput() {
+
+void KeyboardGame::handleInput() {
         if (!Utils::hasInput()) return;  // no key pressed this frame
 
         char ch = Utils::getChar();
-        char key = static_cast<char>(std::toupper(ch));
+        char key = std::toupper(ch);
 
         // If the game is already over (final room):
         // only 'H' should work and return to the main menu
         if (gameOver) {
             if (key == HOME) isRunning = false;      // leave run() and go back to menu
+            onGameEnd();
             return;                                // ignore all other keys in final room
         }
 
@@ -43,28 +47,39 @@
         }
     }
 
-    // הפונקציות פה בהזחה משהו מוזר
-    void KeyboardGame::onGameEnd()
-    {
-        // Save game data only in save mode
-        if (!saveMode)
-            return;
+bool KeyboardGame::getRiddleAnswer(Riddle* riddle, bool& outSolved) {
+     
+    outSolved = riddle->solve();    // Show UI and get user input
 
-        // Retrieve screen source file names from GameBase
-        std::vector<std::string> screenFiles = getScreenSourceFiles();
+    getResults()->addRiddleRes( gameCycles,
+        riddle->getQuestion(), riddle->getLastInput(),outSolved );
 
-        // Save steps and results files
-        bool stepsOk = getSteps()->saveSteps("adv-world.steps", screenFiles);
-        bool resultsOk = getResults()->saveResults("adv-world.result", screenFiles);
+    return true;
+}
 
-        // Notify the user if saving failed
-        if (!stepsOk || !resultsOk) {
-            showError("Error saving game files");
-        }
+void KeyboardGame::onGameEnd()
+{
+    // Save game data only in save mode
+    if (!saveMode)
+        return;
+
+    // Retrieve screen source file names from GameBase
+    std::vector<std::string> screenFiles = getScreenSourceFiles();
+
+    // Save steps and results files
+    bool stepsOk = getSteps()->saveSteps("adv-world.steps", screenFiles);
+    bool resultsOk = getResults()->saveResults("adv-world.results", screenFiles);
+
+    // Notify the user if saving failed
+    if (!stepsOk || !resultsOk) {
+        showError("Error saving game files");
     }
-
-    void KeyboardGame::onPlayerDeath(Player&) {
+}
+   
+ void KeyboardGame::onPlayerDeath() {
         showMessage("Player is dead. Better luck next time... -_-");
+        gameOver = true;
+        isRunning = false;
     }
 
 void KeyboardGame::pauseGame()

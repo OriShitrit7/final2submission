@@ -4,14 +4,11 @@
 #include "Screen.h"
 #include "Player.h"
 #include "Door.h"
-//#include "Key.h"
-//#include "Bomb.h"
 #include "Spring.h"
-//#include "Maps.h"
 #include <fstream>
 #include <string>
 #include <vector>
-//#include <sstream>
+#include <sstream>
 #include <algorithm>
 #include "Steps.h"
 #include "Results.h"
@@ -58,7 +55,7 @@ protected:
     virtual void handleInput() = 0;
     virtual int getDelay() const = 0;
     virtual void onGameEnd() = 0;
-    virtual void onPlayerDeath(Player& player) = 0;
+    virtual void onPlayerDeath() = 0;
 
     // ----- Core Game Loop -----
     void update();
@@ -78,9 +75,12 @@ protected:
     void showMessage(const std::string& msg);
 
     bool processKey(char ch);
-    virtual bool handleRiddles(Player& player);
+    bool handleRiddles(Player& player);
+    virtual bool getRiddleAnswer(Riddle* riddle, bool& outSolved) = 0;
     std::vector<std::string> getScreenSourceFiles() const;
-
+    bool isGameInFinalPhase() const {
+        return playerFinished[0] || playerFinished[1];
+    }
 private:
     // ----- Display Functions -----
     void displayLegend(const Screen& room) const;
@@ -89,7 +89,7 @@ private:
 
     // ----- Game Logic Functions -----
     void moveRoom(Player& p, int dest);
-    Point getStartPoint(Player& player, int idx) const;
+    Point getStartPoint(Player& player, int idx, int dest) const;
     bool playersCollide(int currPlayerIndex, const Point& nextPos);
     void applyLifeLoss(Player& player);
 
@@ -107,10 +107,7 @@ private:
 
     // ----- Helper Functions -----
     
-    // why changed to static ?
     bool isMatchingKey(const Player& player, Screen& room, const Door* door);
-    bool isMatchingKey(Player& player, Screen& room, Door* door) const;
-    //
     void updateDoorBySwitches(int id);
     void explodeBomb(Point center);
     Spring* findAdjacentSpring(const Point& pos);

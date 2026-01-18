@@ -10,9 +10,7 @@ private:
     bool silentMode; // true in -load -silent mode
     Results* expectedResults = nullptr;  // expected results loaded from .results file
     bool testPassed = false;     
-    int delay;      // frame delay (0 in silent mode)  - NEEDED ?
     std::vector<std::string> failures;   // descriptions of test mismatches
-    bool valid;   // indicates whether game files are valid
 
     void compareResults();
     void printTestSummary() const;
@@ -24,13 +22,12 @@ protected:
     void handleInput() override;     // Reads input from steps file instead of keyboard
     void render() override;  
     void onGameEnd() override;
-    void onPlayerDeath(Player&) override {}
+    void onPlayerDeath() override;
     int getDelay() const override {  // Controls game speed (no delay in silent mode)
-        return silentMode ? 0 : FALSE_SILENT_DELAY;
+        return silentMode ? 0 : LOAD_DELAY;
     }
 
-    bool handleRiddles(Player& player) override;  // FIX LATER - can't get player  
-
+    bool getRiddleAnswer(Riddle* riddle, bool& outSolved) override;
 public:
     explicit FileGame(bool silent);    
     ~FileGame();

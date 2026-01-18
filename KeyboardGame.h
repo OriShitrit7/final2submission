@@ -14,16 +14,15 @@ protected:
     void handleInput() override;
     void pauseGame();
     void onGameEnd() override;
-    void onPlayerDeath(Player&) override;
+    void onPlayerDeath() override;
     int getDelay() const override { return KEYBOARD_DELAY; }
+    bool getRiddleAnswer(Riddle* riddle, bool& outSolved) override;
 
 public:
     explicit KeyboardGame(bool save = false);
-    ~KeyboardGame() override;   // why override?
+    ~KeyboardGame();  
 
     void showMenu();
     void showInstructions();
-
-
 
 };

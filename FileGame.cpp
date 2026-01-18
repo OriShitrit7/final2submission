@@ -1,8 +1,8 @@
 #include "FileGame.h"
 
-FileGame::FileGame(bool silent) : GameBase(), silentMode(silent) { }  /// DELAY
+FileGame::FileGame(bool silent) : GameBase(), silentMode(silent) { }  
 
-FileGame::~FileGame() { }
+FileGame::~FileGame() = default; 
 
 
 bool FileGame::loadFileGameResources()
@@ -21,11 +21,13 @@ bool FileGame::loadFileGameResources()
         return false;
     }
 
+    // Load + validate recorded gameplay steps 
+    if (!loadResultsFromFile("adv-world.results")) {
+        return false;
+    }
+
     if (silentMode) {
-        if (!loadResultsFromFile("adv-world.results")) {
-            return false;
-        }
-        // create container for actual results
+        // create container for actual results for comparing later
         setResults(new Results());
     }
 
@@ -39,12 +41,12 @@ bool FileGame::loadStepsFromFile(const std::string& filename)
         showError("Failed to open steps file.");
         return false;
     }
-
+    
     // Validate screen files listed in header
     if (!validateScreensHeader(file)) {
         return false;
     }
-
+    
     // Read steps from file
     Steps* loadedSteps = Steps::loadSteps(file);
     if (!loadedSteps) {
@@ -63,12 +65,12 @@ bool FileGame::loadResultsFromFile(const std::string& filename)
         showError("Failed to open results file.");
         return false;
     }
-
+    
     // Validate screen files listed in header
     if (!validateScreensHeader(file)) {
         return false;
     }
-
+    
     // Read expected results (stream is positioned after header)
     expectedResults = Results::loadResults(file);
     if (!expectedResults) {
@@ -79,47 +81,78 @@ bool FileGame::loadResultsFromFile(const std::string& filename)
     return true;
 }
 
-bool FileGame::validateScreensHeader(std::ifstream& file)
-{
+bool FileGame::validateScreensHeader(std::ifstream& file){
     std::string line;
     std::vector<std::string> screensFromFile;
-
-    // Expect header line: "screens"
-    if (!std::getline(file, line) || line != "screens") {
-        showError("Screen files listed in file do not match loaded screens.");
+    
+    // Expect header line: "# screens"
+    if (!std::getline(file, line)) {
+        showError("Screen header not found.");
         return false;
     }
-
+    
+    if (line != "# screens") {
+        showError("Screen header not found.");
+        return false;
+    }
+    
     // Read screen file names (one per line)
-    while (std::getline(file, line)) {
-        if (line.empty())
-            break;                  // end of screens list
+    while (std::getline(file, line)) {        
+        if (line.empty()) {
+            continue;
+        }
+
+        if (line[0] == '#') {
+            break; 
+        }
+        
         screensFromFile.push_back(line);
     }
-
-    // Validate that every screen listed in the file exists in the loaded screens
-    if (screensFromFile != getScreenSourceFiles()) {
+    auto loadedScreens = getScreenSourceFiles();
+    
+    if (screensFromFile != loadedScreens) {
         showError("Screen files listed in file do not match loaded screens.");
         return false;
     }
-
+    
     return true;
 }
 
-void FileGame::handleInput() {
-    if (getSteps()->isEmpty()) {    // No more steps -> game loop ends ->
-        isRunning = false;    // -> show test results
-        return;
-    }
-    // Execute step only when its iteration matches current game cycle
-    if (getSteps()->isNextStepOnIteration(gameCycles)) {
-        char ch = getSteps()->popStep();
-        processKey(ch);
-    }
-}
 
 void FileGame::render() {   // Suppress rendering in silent mode
     if (!silentMode) GameBase::render();
+}
+
+void FileGame::handleInput() {
+    if (getSteps()->isEmpty()) {  // No more recorded steps available
+
+        // Game already ended normally - exit run loop
+        if (gameOver) {
+            isRunning = false;
+            return;
+        }
+        // If one player finished, waiting for the other - continue
+        if (isGameInFinalPhase()) {
+            return;
+        }
+        // Steps ended before reaching a valid game end
+        showError("ERROR: Steps ended before game finished.");
+        isRunning = false;
+        return;
+    }
+    // Execute step only when its iteration matches current game cycle
+    if (!getSteps()->isNextStepOnIteration(gameCycles)) {
+        return;
+    }
+    char ch = getSteps()->popStep();
+    processKey(ch);
+}
+
+
+void FileGame::onPlayerDeath()
+{
+    gameOver = true;
+    isRunning = false;
 }
 
 void FileGame::onGameEnd() {
@@ -191,4 +224,22 @@ void FileGame::printTestSummary() const{
     for (const auto& msg : failures) {
         std::cout << "- " << msg << std::endl;
     }
+}
+
+bool FileGame::getRiddleAnswer(Riddle* riddle, bool& outSolved)
+{    // Get expected riddle answer for this iteration
+    std::string expA;
+    bool expOk = false;
+
+    if (!expectedResults->getRiddleAtIteration(gameCycles, expA)) {
+        return false;  // No riddle found in results file at this iteration
+    }
+    // Compare file answer to riddle's correct answer
+    outSolved = Utils::toUpperCase(expA) == Utils::toUpperCase(riddle->getAnswer());
+
+    if (silentMode && getResults()) {
+        // Record actual result
+        getResults()->addRiddleRes(gameCycles, riddle->getQuestion(), expA, outSolved);
+    }
+    return true;
 }

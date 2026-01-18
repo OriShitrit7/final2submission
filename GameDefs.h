@@ -11,6 +11,10 @@ static constexpr int MAX_Y = 24;
 static constexpr int LEGEND_HEIGHT = 5;
 static constexpr int LEGEND_WIDTH = 23;
 
+static constexpr int NUM_PLAYERS = 2;
+static constexpr int KEYBOARD_DELAY = 150;
+static constexpr int LOAD_DELAY = 30;
+static constexpr int MAX_SUB_STEPS = 10;
 
 // Input Keys Constants
 constexpr char HOME = 'H';
@@ -86,15 +90,8 @@ inline char itemTypeToChar(ItemType type)
 enum SwitchRule { ALL_ON, ALL_OFF, NO_RULE };  // combinations of switches to open the door:
 constexpr int BOMB_BLAST_RADIUS = 3;
 
-<<<<<<< HEAD
-// Score\Lives panel
-
-enum class ScoreEvent
-{
-=======
 // Event enum used for player's score
 enum class ScoreEvent{
->>>>>>> 1dd256c (Update project with latest files)
     UseKey,
     OpenDoor,
     SolveRiddle,

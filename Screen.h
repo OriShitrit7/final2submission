@@ -43,7 +43,7 @@ private:
 
 	bool illuminated[SCREEN_WIDTH][SCREEN_HEIGHT];      // Marks which cells are currently illuminated by torches.
 	bool validationMask[SCREEN_HEIGHT][SCREEN_WIDTH];  	// Used for object placement validation during screen loading
-	std::string sourceFile;
+	std::string sourceFile = "";
 
 	std::vector<Door> doors;
 	std::vector<Key> keys;

@@ -113,7 +113,8 @@ bool Screen::buildObjectsFromBoard(std::string& error)
 			handleChar(c, x, y);
 		}
 	}
-	// Post-processing for multi-cell objects
+	// Post-
+	// ing for multi-cell objects
 	if (!buildSpringsFromBoard(error))
 		return false;
 
@@ -179,7 +180,9 @@ bool Screen::readDataFromFile(std::ifstream& file, const std::string& filename, 
 			continue;
 
 
-		// Parse and apply rule
+		// Parse and 
+		// 
+		// rule
 		std::string ruleError;
 		if (!parseDataLine(line, ruleError))
 		{
@@ -339,7 +342,6 @@ bool Screen::addTeleporterPair(Point p1, Point p2, std::string& errorMsg)
 	return true;
 }
 
-
 bool Screen::buildSpringsFromBoard(std::string& error)
 {
 	// Save links that are already part of a spring so we won't check them twice
@@ -411,8 +413,6 @@ bool Screen::buildSpringsFromBoard(std::string& error)
 	}
 	return true;
 }
-
-
 
 bool Screen::isSpringBase(int x, int y, Direction& dir) const
 {
@@ -799,8 +799,7 @@ Spring* Screen::getSpringAt(Point p)
 			return &sp;
 		}
 	}
-
-	return nullptr;   // no spring at this position
+	return nullptr; // no spring at this position
 }
 
 Obstacle* Screen::getObstacleAt(Point p)
